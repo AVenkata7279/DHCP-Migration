@@ -23,17 +23,17 @@ Moving the DHCP service to a separate server is a best practice for improving ne
 
 ## Scripts
 
-### backup-dhcp.ps1
+### backup-dhcp
 Exports the current DHCP configuration.
 
-### install-dhcp.ps1
+### install-dhcp
 Installs the DHCP role on a new server.
 
-### migrate-dhcp.ps1
+### migrate-dhcp
 Transfers the DHCP configuration from the Domain Controller to the new server.
 
-### decommission-dhcp.ps1
+### decommission-dhcp
 Removes the DHCP role from the Domain Controller.
 
-### test-dhcp.ps1
+### test-dhcp
 Tests the new DHCP server to ensure that it is working properly.
