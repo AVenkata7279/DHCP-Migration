@@ -1,30 +1,46 @@
 
 <#
 .SYNOPSIS
-Migrating DHCP from Domain controller to seperate server
-Export-DhcpServer is a Windows PowerShell script that 
-Author: Eric Kuehn
+.This script does require the  Modules.
+Author: Venkata Krishnaji A
     
 .DESCRIPTION
-This script is designed to help during the Mapping phase of a penetration test.  It does require a valid set of credentials from the Active Directory Domain being searched.  Once it connects, it goes through the following process:
-    1. All Domain Level objects, containers, and OUs in a Domain
-    2. The permissions assigned to the OU
-    3. If the permissions are different than the parent object
-    4. Exports a list of the permissions
-.PARAMETER ADDomain
-The fully qualified DNS name of the Domain to search
-.PARAMETER NoCredentials
-Do not prompt for a set of credentials to use to bind to Active Directory
-.PARAMETER ComputerDomain
-Do not prompt for the name of an Active Directory Domain and instead use the computer's Domain.
-.EXAMPLE
-Invoke-FindOuPermissions
-Starts the information gathering with default settings: Prompt for a Domain, a set of crednetials, and query the entire Forest.
-.EXAMPLE
-Invoke-FindOuPermissions -LocalCredentials -ComputerDomain
-Starts the inormation gathering using the current credentials and the Domain the computer is a member of.
-.NOTES
-1. Valid credentials are needed to bind to the Active Directory Domain.
+This script is designed to help during Migration of DHCP role from Domain controller to seperate server:
+    1. Servers are in same domain
+    2. Backup DHCP Configurations
+    3. Install DHCP Server Role on New Server
+    4. Transfer DHCP Configuration to New Server
+    5. Authorize the New DHCP Server
+    6. Decommission DHCP on Domain Controller
+/dhcp-migration-project
+│
+├── README.md        # Project overview and instructions
+├── backup-dhcp      # Script for backing up DHCP configuration
+├── install-dhcp     # Script for installing DHCP on a new server
+├── migrate-dhcp     # Script for migrating DHCP configuration
+├── decommission     # Script for removing DHCP from the Domain Controller
+├── test-dhcp        # Script for testing the new DHCP server
+├── LICENSE          # License for the project
+└── .gitignore       # Ignore unnecessary files (e.g., backup files)
+
 #>
 
 #///////Accept the input information for the script
+
+# Export DHCP Server Configuration
+Export-DhcpServer -ComputerName "DomainController" -Leases -File "C:\Backup\dhcp_config.xml"
+
+# Install DHCP Role on the new server
+Install-WindowsFeature -Name DHCP -IncludeManagementTools
+
+# Optionally, configure the DHCP server to be authorized in Active Directory
+Add-DhcpServerInDC -DnsName "newdhcpserver.yourdomain.com" -IPAddress "newdhcpserver_ip"
+
+# Import DHCP Configuration
+Import-DhcpServer -ComputerName "NewDHCPServer" -File "C:\Backup\dhcp_config.xml" -BackupPath "C:\Backup" -Force
+
+# Authorize DHCP Server in Active Directory
+Add-DhcpServerInDC -DnsName "newdhcpserver.yourdomain.com" -IPAddress "newdhcpserver_ip"
+
+# Remove DHCP role from Domain Controller
+Uninstall-WindowsFeature -Name DHCP
