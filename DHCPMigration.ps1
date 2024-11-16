@@ -1,7 +1,7 @@
 
 <#
 .SYNOPSIS
-.This script does require the  Modules.
+.This script does require DHCP Modules.
 Author: Venkata Krishnaji A
     
 .DESCRIPTION
